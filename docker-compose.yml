@@ -1,0 +1,13 @@
+db:
+    image: postgres
+web:
+    build: .
+    command: gunicorn --reload -b 0.0.0.0:5000 app:api
+    volumes:
+        - .:/src
+    ports:
+        - 5000:5000
+    links:
+        - db
+    environment:
+        DEBUG: True
