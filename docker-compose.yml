@@ -1,12 +1,16 @@
 db:
     image: postgres
+    ports:
+        - "5432:5432"
+    environment:
+        POSTGRES_PASSWORD: 123456
 web:
     build: .
     command: gunicorn --reload -b 0.0.0.0:5000 app:api
     volumes:
         - .:/src
     ports:
-        - 5000:5000
+        - "5000:5000"
     links:
         - db
     environment:
