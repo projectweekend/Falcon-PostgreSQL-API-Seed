@@ -1,7 +1,12 @@
 import falcon
+from middleware import JSONBodyParser
+from utils.database import database_connection
 
 
-api = falcon.API()
+middleware = [JSONBodyParser()]
+
+api = falcon.API(middleware=middleware)
+db = database_connection()
 
 
 import routes
