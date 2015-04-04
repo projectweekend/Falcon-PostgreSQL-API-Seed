@@ -3,6 +3,8 @@ import falcon
 from app.utils.auth import hash_password, verify_password
 from validation import validate_user_create
 
+USER_FIELDS = ['id', 'email']
+
 
 class UserResource(object):
 
@@ -13,4 +15,10 @@ class UserResource(object):
     def on_post(self, req, res):
         email = req.context['data']['email']
         password = hash_password(req.context['data']['password'])
-        res.body = json.dumps({})
+
+        cursor = self.db.cursor()
+        cursor.callproc('sp_app_user_insert', [email, password])
+
+        user_dict = dict(zip(USER_FIELDS, cursor.fetchone()))
+
+        res.body = json.dumps(user_dict)
