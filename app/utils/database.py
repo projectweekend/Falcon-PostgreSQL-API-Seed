@@ -6,7 +6,7 @@ from urlparse import urlparse
 def database_connection():
     docker_db_host = os.getenv('DB_PORT_5432_TCP_ADDR', None)
     if docker_db_host:
-        database_url = 'postgres://postgres:123456@{0}:5432/postgres'.format(docker_db_host)
+        database_url = 'postgres://postgres@{0}:5432/postgres'.format(docker_db_host)
     else:
         database_url = os.getenv('DATABASE_URL', None)
 

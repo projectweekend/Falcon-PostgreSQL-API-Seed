@@ -20,5 +20,5 @@ BEGIN
                 app_users.is_active,
                 app_users.is_admin
     FROM        app_users
-    WHERE       app_users.email = userEmail
+    WHERE       app_users.email = userEmail;
 END; $$ LANGUAGE plpgsql;
