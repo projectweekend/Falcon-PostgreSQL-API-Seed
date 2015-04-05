@@ -2,6 +2,7 @@ bcrypt==1.1.1
 Cerberus==0.8.1
 falcon==0.2
 gunicorn==19.3.0
+itsdangerous==0.24
 psycopg2==2.6
 python-mimeparse==0.1.4
 six==1.9.0

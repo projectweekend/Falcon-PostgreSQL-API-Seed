@@ -15,3 +15,4 @@ web:
         - db
     environment:
         DEBUG: True
+        SECRET_KEY: secretkey
