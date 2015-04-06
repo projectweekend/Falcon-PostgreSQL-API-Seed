@@ -30,6 +30,7 @@ class UserResource(object):
         db.commit()
         cursor.close()
 
+        res.status = falcon.HTTP_201
         res.body = json.dumps({
             'token': generate_token(user_dict)
         })
