@@ -7,6 +7,7 @@ web:
     command: gunicorn --reload -b 0.0.0.0:5000 app:api
     volumes:
         - .:/src
+        - ./sql:/opt/flyway-3.2.1/sql
     ports:
         - "5000:5000"
     links:
