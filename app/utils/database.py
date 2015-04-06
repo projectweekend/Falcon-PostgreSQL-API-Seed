@@ -3,16 +3,18 @@ import psycopg2
 from urlparse import urlparse
 
 
-def database_connection():
+def database_url():
     docker_db_host = os.getenv('DB_PORT_5432_TCP_ADDR', None)
     if docker_db_host:
         database_url = 'postgres://postgres@{0}:5432/postgres'.format(docker_db_host)
     else:
         database_url = os.getenv('DATABASE_URL', None)
-
     assert database_url
+    return database_url
 
-    parsed = urlparse(database_url)
+
+def database_connection():
+    parsed = urlparse(database_url())
     user = parsed.username
     password = parsed.password
     host = parsed.hostname
