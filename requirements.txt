@@ -1,4 +1,5 @@
 bcrypt==1.1.1
+codecov==1.1.7
 Cerberus==0.8.1
 falcon==0.2
 gunicorn==19.3.0
