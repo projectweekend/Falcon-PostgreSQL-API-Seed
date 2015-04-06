@@ -13,3 +13,4 @@ class UserResourceTestCase(APITestCase):
     def test_create_a_user(self):
         body = self.simulate_post('/user', VALID_DATA)
         self.assertEqual(self.srmock.status, falcon.HTTP_201)
+        self.assertNotEqual(len(body['token']), 0)
