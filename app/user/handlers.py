@@ -2,8 +2,8 @@ import json
 import falcon
 from psycopg2 import IntegrityError
 from app import db
-from app.utils.auth import hash_password, verify_password, generate_token
-from validation import validate_user_create, validate_user_auth
+from app.utils.auth import hash_password, generate_token
+from validation import validate_user_create
 
 USER_FIELDS = ['id', 'email', 'password', 'is_active', 'is_admin']
 USER_TOKEN_FIELDS = ['id', 'email', 'is_active', 'is_admin']
@@ -31,31 +31,6 @@ class UserResource(object):
         cursor.close()
 
         res.status = falcon.HTTP_201
-        res.body = json.dumps({
-            'token': generate_token(user_dict)
-        })
-
-
-class AuthenticationResource(object):
-
-    @falcon.before(validate_user_auth)
-    def on_post(self, req, res):
-        email = req.context['data']['email']
-        password = req.context['data']['password']
-
-        cursor = db.cursor()
-        cursor.callproc('sp_lookup_user_by_email', [email])
-
-        user_dict = dict(zip(USER_FIELDS, cursor.fetchone()))
-
-        valid_password = verify_password(password, user_dict.pop('password'))
-        if not valid_password:
-            title = 'Unauthorized'
-            description = 'Invalid credentials'
-            raise falcon.HTTPUnauthorized(title, description)
-
-        cursor.close()
-
         res.body = json.dumps({
             'token': generate_token(user_dict)
         })
