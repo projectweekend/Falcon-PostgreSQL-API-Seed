@@ -1,5 +1,5 @@
 import falcon
-from middleware import JSONBodyParser
+from middleware.body_parser import JSONBodyParser
 from utils.database import database_connection
 
 
