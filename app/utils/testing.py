@@ -26,7 +26,7 @@ class APITestCase(TestBase):
         port = parsed.port
         database = parsed.path.strip('/')
 
-        command = 'flyway -q -url=jdbc:postgresql://{0}:{1}/{2} -user={3} {4}'
+        command = 'flyway -url=jdbc:postgresql://{0}:{1}/{2} -user={3} {4}'
         command = command.format(host, port, database, user, flyway_command)
         subprocess.check_call(command.split())
 
