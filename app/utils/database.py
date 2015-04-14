@@ -1,24 +1,17 @@
-import os
 import psycopg2
 from urlparse import urlparse
-
-
-def database_url():
-    docker_db_host = os.getenv('DB_PORT_5432_TCP_ADDR', None)
-    if docker_db_host:
-        database_url = 'postgres://postgres@{0}:5432/postgres'.format(docker_db_host)
-    else:
-        database_url = os.getenv('DATABASE_URL', None)
-    assert database_url
-    return database_url
+from app.config import DATABASE_URL
 
 
 def database_connection():
-    parsed = urlparse(database_url())
+    parsed = urlparse(DATABASE_URL)
     user = parsed.username
     password = parsed.password
     host = parsed.hostname
     port = parsed.port
     database = parsed.path.strip('/')
 
-    return psycopg2.connect(host=host, port=port, user=user, password=password, database=database)
+    connection = psycopg2.connect(host=host, port=port, user=user, password=password, database=database)
+    connection.set_session(autocommit=True)
+
+    return connection
