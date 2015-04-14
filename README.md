@@ -38,7 +38,7 @@ API Routes
 
 **POST:**
 ```
-/api/user
+/v1/user
 ```
 
 **Body:**
