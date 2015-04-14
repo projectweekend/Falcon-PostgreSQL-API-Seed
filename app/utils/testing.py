@@ -1,9 +1,9 @@
 import json
-import subprocess
+
 from urlparse import urlparse
 from falcon.testing import TestBase
-from app import api
-from app.utils.database import database_url
+from app import api, db
+from app.config import DATABASE_URL
 
 
 HEADERS = {'Content-Type': 'application/json'}
@@ -13,28 +13,26 @@ class APITestCase(TestBase):
 
     def setUp(self):
         super(APITestCase, self).setUp()
-        self.flyway_migrate()
+        self._empty_tables()
 
-    def tearDown(self):
-        super(APITestCase, self).tearDown()
-        self.flyway_clean()
+    @staticmethod
+    def _empty_tables():
+        parsed = urlparse(DATABASE_URL)
 
-    def _run_flyway_command(self, flyway_command):
-        parsed = urlparse(database_url())
-        user = parsed.username
-        host = parsed.hostname
-        port = parsed.port
-        database = parsed.path.strip('/')
-
-        command = 'flyway -url=jdbc:postgresql://{0}:{1}/{2} -user={3} {4}'
-        command = command.format(host, port, database, user, flyway_command)
-        subprocess.check_call(command.split())
-
-    def flyway_migrate(self):
-        self._run_flyway_command('migrate')
-
-    def flyway_clean(self):
-        self._run_flyway_command('clean')
+        app_tables_query = """
+        SELECT          table_name
+        FROM            information_schema.tables
+        WHERE           table_schema = 'public' AND
+                        table_catalog = '{0}' AND
+                        table_name != 'schema_version';""".format(parsed.path.strip('/'))
+        cursor = db.cursor()
+        cursor.execute(app_tables_query)
+        tables = [r[0] for r in cursor.fetchall()]
+        for t in tables:
+            query = 'TRUNCATE TABLE {0} CASCADE;'.format(t)
+            cursor.execute(query)
+            db.commit()
+        cursor.close()
 
     def simulate_get(self, path, data):
         self.api = api
