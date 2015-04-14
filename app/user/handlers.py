@@ -1,14 +1,16 @@
 import json
 import falcon
 from psycopg2 import IntegrityError
-from app import db
 from app.utils.auth import hash_password, verify_password, generate_token
+from app.utils.hooks import open_cursor_hook, close_cursor_hook
 from validation import validate_user_create, validate_user_auth
 
 USER_FIELDS = ['id', 'email', 'password', 'is_active', 'is_admin']
 USER_TOKEN_FIELDS = ['id', 'email', 'is_active', 'is_admin']
 
 
+@falcon.before(open_cursor_hook)
+@falcon.after(close_cursor_hook)
 class UserResource(object):
 
     @falcon.before(validate_user_create)
@@ -16,19 +18,14 @@ class UserResource(object):
         email = req.context['data']['email']
         password = hash_password(req.context['data']['password'])
 
-        cursor = db.cursor()
-
         try:
-            cursor.callproc('sp_user_insert', [email, password])
+            self.cursor.callproc('sp_user_insert', [email, password])
         except IntegrityError:
-            db.rollback()
             title = 'Conflict'
             description = 'Email in use'
             raise falcon.HTTPConflict(title, description)
 
-        user_dict = dict(zip(USER_TOKEN_FIELDS, cursor.fetchone()))
-        db.commit()
-        cursor.close()
+        user_dict = dict(zip(USER_TOKEN_FIELDS, self.cursor.fetchone()))
 
         res.status = falcon.HTTP_201
         res.body = json.dumps({
@@ -36,6 +33,8 @@ class UserResource(object):
         })
 
 
+@falcon.before(open_cursor_hook)
+@falcon.after(close_cursor_hook)
 class AuthenticationResource(object):
 
     @falcon.before(validate_user_auth)
@@ -46,11 +45,9 @@ class AuthenticationResource(object):
         email = req.context['data']['email']
         password = req.context['data']['password']
 
-        cursor = db.cursor()
-        cursor.callproc('sp_lookup_user_by_email', [email, ])
+        self.cursor.callproc('sp_lookup_user_by_email', [email, ])
 
-        result = cursor.fetchone()
-        cursor.close()
+        result = self.cursor.fetchone()
         if result is None:
             raise falcon.HTTPUnauthorized(unauthorized_title, unauthorized_description)
 
