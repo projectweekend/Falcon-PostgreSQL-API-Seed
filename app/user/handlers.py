@@ -60,5 +60,5 @@ class AuthenticationResource(object):
 
         res.status = falcon.HTTP_200
         res.body = json.dumps({
-            'token': 'test'
+            'token': generate_token(user_dict)
         })
