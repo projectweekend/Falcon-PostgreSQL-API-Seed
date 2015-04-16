@@ -34,7 +34,35 @@ API Routes
 ====================
 
 
-### Register a new user
+### Authenticate a user
+
+**POST:**
+```
+/v1/authenticate
+```
+
+**Body:**
+```json
+{
+    "email": "something@email.com",
+    "password": "12345678"
+}
+```
+
+**Response:**
+```json
+{
+    "token": "reallylongjsonwebtokenstring"
+}
+```
+
+**Status Codes:**
+* `200` if successful
+* `400` if incorrect data provided
+* `401` if invalid credentials
+
+
+### Register a user
 
 **POST:**
 ```
@@ -60,5 +88,3 @@ API Routes
 * `201` if successful
 * `400` if incorrect data provided
 * `409` if email is in use
-
-
