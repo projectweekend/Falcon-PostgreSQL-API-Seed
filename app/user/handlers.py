@@ -3,7 +3,8 @@ import falcon
 from psycopg2 import IntegrityError
 from app.utils.auth import hash_password, verify_password, generate_token
 from app.utils.hooks import open_cursor_hook, close_cursor_hook
-from validation import validate_user_create, validate_user_auth
+from app.utils.misc import make_code
+from validation import validate_user_create, validate_user_auth, validate_request_password_reset
 
 USER_FIELDS = ['id', 'email', 'password', 'is_active', 'is_admin']
 USER_TOKEN_FIELDS = ['id', 'email', 'is_active', 'is_admin']
@@ -52,7 +53,6 @@ class AuthenticationResource(object):
             raise falcon.HTTPUnauthorized(unauthorized_title, unauthorized_description)
 
         user_dict = dict(zip(USER_FIELDS, result))
-        print(user_dict)
 
         valid_password = verify_password(password, user_dict.pop('password'))
         if not valid_password:
@@ -62,3 +62,26 @@ class AuthenticationResource(object):
         res.body = json.dumps({
             'token': generate_token(user_dict)
         })
+
+
+class PasswordResetRequestResource(object):
+
+    @falcon.before(validate_request_password_reset)
+    def on_post(self, req, res):
+        email = req.context['data']['email']
+
+        self.cursor.callproc('sp_lookup_user_by_email', [email, ])
+        result = self.cursor.fetchone()
+        if result:
+            user_dict = dict(zip(USER_FIELDS, result))
+            self.cursor.callproc('sp_app_password_reset_insert', [user_dict['id'], make_code(), ])
+            # TODO: send email using preferred method
+
+        res.status = falcon.HTTP_201
+        res.body = json.dumps({})
+
+
+class PasswordResetConfirmResource(object):
+
+    def on_post(self, req, res):
+        pass
