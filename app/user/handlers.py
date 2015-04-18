@@ -64,6 +64,8 @@ class AuthenticationResource(object):
         })
 
 
+@falcon.before(open_cursor_hook)
+@falcon.after(close_cursor_hook)
 class PasswordResetRequestResource(object):
 
     @falcon.before(validate_request_password_reset)
@@ -79,9 +81,3 @@ class PasswordResetRequestResource(object):
 
         res.status = falcon.HTTP_201
         res.body = json.dumps({})
-
-
-class PasswordResetConfirmResource(object):
-
-    def on_post(self, req, res):
-        pass
