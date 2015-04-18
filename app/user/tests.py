@@ -1,9 +1,11 @@
 import falcon
+from app import db
 from app.utils.testing import APITestCase
 
 
 USER_RESOURCE_ROUTE = '/v1/user'
 USER_AUTH_ROUTE = '/v1/authenticate'
+PASSWORD_RESET_REQUEST_ROUTE = '/v1/password-reset/request'
 
 VALID_DATA = {
     'email': 'abcd@efgh.com',
@@ -89,3 +91,30 @@ class AuthenticationResourceTestCase(APITestCase):
 
         self.simulate_post(USER_AUTH_ROUTE, INVALID_DATA['NOT_REGISTERED'])
         self.assertEqual(self.srmock.status, falcon.HTTP_401)
+
+
+class PasswordResetRequestResourceTestCase(APITestCase):
+
+    def test_password_reset_request_with_matching_user(self):
+        self.simulate_post(USER_RESOURCE_ROUTE, VALID_DATA)
+        self.assertEqual(self.srmock.status, falcon.HTTP_201)
+
+        self.simulate_post(PASSWORD_RESET_REQUEST_ROUTE, {'email': VALID_DATA['email']})
+        self.assertEqual(self.srmock.status, falcon.HTTP_201)
+
+        cursor = db.cursor()
+        cursor.execute('SELECT COUNT(id) FROM app_password_reset')
+        result = cursor.fetchone()
+        self.assertEqual(int(result[0]), 1)
+        cursor.close()
+
+    def test_password_reset_request_with_no_matching_user(self):
+        self.simulate_post(USER_RESOURCE_ROUTE, VALID_DATA)
+        self.assertEqual(self.srmock.status, falcon.HTTP_201)
+
+        self.simulate_post(PASSWORD_RESET_REQUEST_ROUTE, {'email': INVALID_DATA['NOT_REGISTERED']['email']})
+        self.assertEqual(self.srmock.status, falcon.HTTP_201)
+
+    def test_password_reset_request_with_invalid_data(self):
+        self.simulate_post(PASSWORD_RESET_REQUEST_ROUTE, {'email': INVALID_DATA['BAD_EMAIL']['email']})
+        self.assertEqual(self.srmock.status, falcon.HTTP_400)
