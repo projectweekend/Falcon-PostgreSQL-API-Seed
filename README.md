@@ -88,3 +88,24 @@ API Routes
 * `201` if successful
 * `400` if incorrect data provided
 * `409` if email is in use
+
+
+### Request a password reset
+
+**POST:**
+```
+/v1/password-reset/request
+```
+
+**Body:**
+```json
+{
+    "email": "something@email.com"
+}
+```
+
+**Response:** None
+
+**Status Codes:**
+* `201` if successful
+* `400` if incorrect data provided
