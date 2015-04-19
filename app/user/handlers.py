@@ -95,5 +95,5 @@ class PasswordResetConfirmResource(object):
         password = hash_password(req.context['data']['password'])
         self.cursor.callproc('sp_reset_password', [code, password, ])
         result = self.cursor.fetchone()
-        res.status = falcon.HTTP_200 if result else falcon.HTTP_401
+        res.status = falcon.HTTP_200 if result[0] else falcon.HTTP_401
         res.body = json.dumps({})

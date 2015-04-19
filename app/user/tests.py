@@ -6,6 +6,7 @@ from app.utils.testing import APITestCase
 USER_RESOURCE_ROUTE = '/v1/user'
 USER_AUTH_ROUTE = '/v1/authenticate'
 PASSWORD_RESET_REQUEST_ROUTE = '/v1/password-reset/request'
+PASSWORD_RESET_CONFIRM_ROUTE = '/v1/password-reset/confirm'
 
 VALID_DATA = {
     'email': 'abcd@efgh.com',
@@ -117,4 +118,61 @@ class PasswordResetRequestResourceTestCase(APITestCase):
 
     def test_password_reset_request_with_invalid_data(self):
         self.simulate_post(PASSWORD_RESET_REQUEST_ROUTE, {'email': INVALID_DATA['BAD_EMAIL']['email']})
+        self.assertEqual(self.srmock.status, falcon.HTTP_400)
+
+
+class PasswordResetConfirmResourceTestCase(APITestCase):
+
+    def test_password_reset_confirm_with_matching_code(self):
+        self.simulate_post(USER_RESOURCE_ROUTE, VALID_DATA)
+        self.assertEqual(self.srmock.status, falcon.HTTP_201)
+
+        self.simulate_post(PASSWORD_RESET_REQUEST_ROUTE, {'email': VALID_DATA['email']})
+        self.assertEqual(self.srmock.status, falcon.HTTP_201)
+
+        cursor = db.cursor()
+        cursor.execute('SELECT code FROM app_password_reset')
+        result = cursor.fetchone()
+        cursor.close()
+
+        request_data = {
+            'code': result[0],
+            'password': 'newpassword'
+        }
+        self.simulate_post(PASSWORD_RESET_CONFIRM_ROUTE, request_data)
+        self.assertEqual(self.srmock.status, falcon.HTTP_200)
+
+        request_data = {
+            'email': VALID_DATA['email'],
+            'password': 'newpassword'
+        }
+        body = self.simulate_post(USER_AUTH_ROUTE, request_data)
+        self.assertEqual(self.srmock.status, falcon.HTTP_200)
+        self.assertNotEqual(len(body['token']), 0)
+
+    def test_password_reset_confirm_with_no_matching_code(self):
+        self.simulate_post(USER_RESOURCE_ROUTE, VALID_DATA)
+        self.assertEqual(self.srmock.status, falcon.HTTP_201)
+
+        self.simulate_post(PASSWORD_RESET_REQUEST_ROUTE, {'email': VALID_DATA['email']})
+        self.assertEqual(self.srmock.status, falcon.HTTP_201)
+
+        request_data = {
+            'code': 'does not exist',
+            'password': 'newpassword'
+        }
+        self.simulate_post(PASSWORD_RESET_CONFIRM_ROUTE, request_data)
+        self.assertEqual(self.srmock.status, falcon.HTTP_401)
+
+    def test_password_reset_confirm_with_invalid_data(self):
+        missing_password = {
+            'code': 'some-fake-code'
+        }
+        self.simulate_post(PASSWORD_RESET_CONFIRM_ROUTE, missing_password)
+        self.assertEqual(self.srmock.status, falcon.HTTP_400)
+
+        missing_code = {
+            'password': 'newpassword'
+        }
+        self.simulate_post(PASSWORD_RESET_CONFIRM_ROUTE, missing_code)
         self.assertEqual(self.srmock.status, falcon.HTTP_400)
