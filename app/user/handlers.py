@@ -73,14 +73,7 @@ class PasswordResetRequestResource(object):
     @falcon.before(validate_request_password_reset)
     def on_post(self, req, res):
         email = req.context['data']['email']
-
-        self.cursor.callproc('sp_lookup_user_by_email', [email, ])
-        result = self.cursor.fetchone()
-        if result:
-            user_dict = dict(zip(USER_FIELDS, result))
-            self.cursor.callproc('sp_app_password_reset_insert', [user_dict['id'], make_code(), ])
-            # TODO: send email using preferred method
-
+        self.cursor.callproc('sp_reset_password_request', [email, make_code(), ])
         res.status = falcon.HTTP_201
         res.body = json.dumps({})
 
