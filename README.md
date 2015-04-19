@@ -109,3 +109,26 @@ API Routes
 **Status Codes:**
 * `201` if successful
 * `400` if incorrect data provided
+
+
+### Confirm a password reset
+
+**POST:**
+```
+/v1/password-reset/confirm
+```
+
+**Body:**
+```json
+{
+    "code": "6afc2148-5e2f-4c71-93a9-d250f90fccc2",
+    "password": "MyNewPassword"
+}
+```
+
+**Response:** None
+
+**Status Codes:**
+* `200` if successful
+* `400` if incorrect data provided
+* `401` if code not valid
