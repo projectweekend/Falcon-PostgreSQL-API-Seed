@@ -4,7 +4,9 @@ from psycopg2 import IntegrityError
 from app.utils.auth import hash_password, verify_password, generate_token
 from app.utils.hooks import open_cursor_hook, close_cursor_hook
 from app.utils.misc import make_code
-from validation import validate_user_create, validate_user_auth, validate_request_password_reset
+from validation import (
+    validate_user_create, validate_user_auth, validate_request_password_reset,
+    validate_confirm_password_reset)
 
 USER_FIELDS = ['id', 'email', 'password', 'is_active', 'is_admin']
 USER_TOKEN_FIELDS = ['id', 'email', 'is_active', 'is_admin']
@@ -80,4 +82,18 @@ class PasswordResetRequestResource(object):
             # TODO: send email using preferred method
 
         res.status = falcon.HTTP_201
+        res.body = json.dumps({})
+
+
+@falcon.before(open_cursor_hook)
+@falcon.after(close_cursor_hook)
+class PasswordResetConfirmResource(object):
+
+    @falcon.before(validate_confirm_password_reset)
+    def on_post(self, req, res):
+        code = req.context['data']['code']
+        password = hash_password(req.context['data']['password'])
+        self.cursor.callproc('sp_reset_password', [code, password, ])
+        result = self.cursor.fetchone()
+        res.status = falcon.HTTP_200 if result else falcon.HTTP_401
         res.body = json.dumps({})

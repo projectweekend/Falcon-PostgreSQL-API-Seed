@@ -54,3 +54,14 @@ def validate_request_password_reset(req, res, resource, params):
     v = Validator(schema)
     if not v.validate(req.context['data']):
         raise falcon.HTTPBadRequest('Bad request', v.errors)
+
+
+def validate_confirm_password_reset(req, res, resource, params):
+    schema = {
+        'code': FIELDS['code'],
+        'password': FIELDS['password_create']
+    }
+
+    v = Validator(schema)
+    if not v.validate(req.context['data']):
+        raise falcon.HTTPBadRequest('Bad request', v.errors)
