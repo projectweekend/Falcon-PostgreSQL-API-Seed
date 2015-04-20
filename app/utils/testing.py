@@ -34,47 +34,50 @@ class APITestCase(TestBase):
             db.commit()
         cursor.close()
 
-    def simulate_get(self, path, data):
+    def _simulate_request(self, method, path, data, token=None):
+        if token:
+            HEADERS['Authorization'] = token
+
         self.api = api
+
         result = self.simulate_request(
             path=path,
+            method=method,
+            headers=HEADERS,
+            body=json.dumps(data))
+        return json.loads(result[0])
+
+    def simulate_get(self, path, data, token=None):
+        return self._simulate_request(
             method='GET',
-            headers=HEADERS,
-            body=json.dumps(data))
-        return json.loads(result[0])
-
-    def simulate_post(self, path, data):
-        self.api = api
-        result = self.simulate_request(
             path=path,
+            data=data,
+            token=token)
+
+    def simulate_post(self, path, data, token=None):
+        return self._simulate_request(
             method='POST',
-            headers=HEADERS,
-            body=json.dumps(data))
-        return json.loads(result[0])
-
-    def simulate_put(self, path, data):
-        self.api = api
-        result = self.simulate_request(
             path=path,
+            data=data,
+            token=token)
+
+    def simulate_put(self, path, data, token=None):
+        return self._simulate_request(
             method='PUT',
-            headers=HEADERS,
-            body=json.dumps(data))
-        return json.loads(result[0])
-
-    def simulate_patch(self, path, data):
-        self.api = api
-        result = self.simulate_request(
             path=path,
+            data=data,
+            token=token)
+
+    def simulate_patch(self, path, data, token=None):
+        return self._simulate_request(
             method='PATCH',
-            headers=HEADERS,
-            body=json.dumps(data))
-        return json.loads(result[0])
-
-    def simulate_delete(self, path, data):
-        self.api = api
-        result = self.simulate_request(
             path=path,
+            data=data,
+            token=token)
+
+    def simulate_delete(self, path, data, token=None):
+        return self._simulate_request(
             method='DELETE',
-            headers=HEADERS,
-            body=json.dumps(data))
-        return json.loads(result[0])
+            path=path,
+            data=data,
+            token=token)
