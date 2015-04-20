@@ -7,6 +7,7 @@ USER_RESOURCE_ROUTE = '/v1/user'
 USER_AUTH_ROUTE = '/v1/authenticate'
 PASSWORD_RESET_REQUEST_ROUTE = '/v1/password-reset/request'
 PASSWORD_RESET_CONFIRM_ROUTE = '/v1/password-reset/confirm'
+AUTH_TEST_ROUTE = '/v1/test/auth'
 
 VALID_DATA = {
     'email': 'abcd@efgh.com',
@@ -176,3 +177,22 @@ class PasswordResetConfirmResourceTestCase(APITestCase):
         }
         self.simulate_post(PASSWORD_RESET_CONFIRM_ROUTE, missing_code)
         self.assertEqual(self.srmock.status, falcon.HTTP_400)
+
+
+class AuthTestResourceTestCase(APITestCase):
+
+    def test_auth_required_with_valid_token(self):
+        body = self.simulate_post(USER_RESOURCE_ROUTE, VALID_DATA)
+        self.assertEqual(self.srmock.status, falcon.HTTP_201)
+
+        body = self.simulate_get(AUTH_TEST_ROUTE, body['token'])
+        self.assertEqual(self.srmock.status, falcon.HTTP_200)
+        self.assertEqual(body['email'], VALID_DATA['email'])
+
+    def test_auth_required_with_invalid_token(self):
+        self.simulate_get(AUTH_TEST_ROUTE, 'fake token')
+        self.assertEqual(self.srmock.status, falcon.HTTP_401)
+
+    def test_auth_required_with_no_token(self):
+        self.simulate_get(AUTH_TEST_ROUTE)
+        self.assertEqual(self.srmock.status, falcon.HTTP_401)

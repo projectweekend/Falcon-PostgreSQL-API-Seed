@@ -2,7 +2,7 @@ import json
 import falcon
 from psycopg2 import IntegrityError
 from app.utils.auth import hash_password, verify_password, generate_token
-from app.utils.hooks import open_cursor_hook, close_cursor_hook
+from app.utils.hooks import open_cursor_hook, close_cursor_hook, auth_required
 from app.utils.misc import make_code
 from validation import (
     validate_user_create, validate_user_auth, validate_request_password_reset,
@@ -90,3 +90,13 @@ class PasswordResetConfirmResource(object):
         result = self.cursor.fetchone()
         res.status = falcon.HTTP_200 if result[0] else falcon.HTTP_401
         res.body = json.dumps({})
+
+
+class AuthTestResource(object):
+
+    @falcon.before(auth_required)
+    def on_get(self, req, res):
+        res.status = falcon.HTTP_200
+        res.body = json.dumps({
+            'email': req.context['auth_user']['email']
+        })

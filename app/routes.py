@@ -6,3 +6,6 @@ api.add_route('/v1/user', user_handlers.UserResource())
 api.add_route('/v1/authenticate', user_handlers.AuthenticationResource())
 api.add_route('/v1/password-reset/request', user_handlers.PasswordResetRequestResource())
 api.add_route('/v1/password-reset/confirm', user_handlers.PasswordResetConfirmResource())
+
+# Routes for test only
+api.add_route('/v1/test/auth', user_handlers.AuthTestResource())
