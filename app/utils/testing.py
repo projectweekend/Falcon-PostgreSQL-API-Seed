@@ -47,11 +47,11 @@ class APITestCase(TestBase):
             body=json.dumps(data))
         return json.loads(result[0])
 
-    def simulate_get(self, path, data, token=None):
+    def simulate_get(self, path, token=None):
         return self._simulate_request(
             method='GET',
             path=path,
-            data=data,
+            data=None,
             token=token)
 
     def simulate_post(self, path, data, token=None):
@@ -75,9 +75,9 @@ class APITestCase(TestBase):
             data=data,
             token=token)
 
-    def simulate_delete(self, path, data, token=None):
+    def simulate_delete(self, path, token=None):
         return self._simulate_request(
             method='DELETE',
             path=path,
-            data=data,
+            data=None,
             token=token)
