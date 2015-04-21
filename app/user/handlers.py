@@ -92,6 +92,7 @@ class PasswordResetConfirmResource(object):
         res.body = json.dumps({})
 
 
+# Handlers for test routes
 class AuthTestResource(object):
 
     @falcon.before(auth_required)
