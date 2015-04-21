@@ -1,6 +1,7 @@
 import falcon
-from app import db
+from app import api, db
 from app.utils.testing import APITestCase
+from app.user import handlers as user_handlers
 
 
 USER_RESOURCE_ROUTE = '/v1/user'
@@ -180,6 +181,12 @@ class PasswordResetConfirmResourceTestCase(APITestCase):
 
 
 class AuthTestResourceTestCase(APITestCase):
+
+    def setUp(self):
+        super(AuthTestResourceTestCase, self).setUp()
+        self.api = api
+        # Add route to test the AuthUser middleware
+        self.api.add_route('/v1/test/auth', user_handlers.AuthTestResource())
 
     def test_auth_required_with_valid_token(self):
         body = self.simulate_post(USER_RESOURCE_ROUTE, VALID_DATA)
