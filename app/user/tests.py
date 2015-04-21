@@ -1,7 +1,12 @@
+import json
+from time import time
 import falcon
 from app import api, db
 from app.utils.testing import APITestCase
 from app.user import handlers as user_handlers
+from app.middleware.rate_limit import RateLimiter
+from app.middleware.body_parser import JSONBodyParser
+from app.middleware.auth import AuthUser
 
 
 USER_RESOURCE_ROUTE = '/v1/user'
@@ -186,7 +191,7 @@ class AuthTestResourceTestCase(APITestCase):
         super(AuthTestResourceTestCase, self).setUp()
         self.api = api
         # Add route to test the AuthUser middleware
-        self.api.add_route('/v1/test/auth', user_handlers.AuthTestResource())
+        self.api.add_route(AUTH_TEST_ROUTE, user_handlers.AuthTestResource())
 
     def test_auth_required_with_valid_token(self):
         body = self.simulate_post(USER_RESOURCE_ROUTE, VALID_DATA)
@@ -203,3 +208,30 @@ class AuthTestResourceTestCase(APITestCase):
     def test_auth_required_with_no_token(self):
         self.simulate_get(AUTH_TEST_ROUTE)
         self.assertEqual(self.srmock.status, falcon.HTTP_401)
+
+
+class RateLimitTestCase(APITestCase):
+
+    def setUp(self):
+        super(RateLimitTestCase, self).setUp()
+        self.api = falcon.API(middleware=[JSONBodyParser(), AuthUser(), RateLimiter()])
+        # Add route to test the RateLimiter middleware
+        self.api.add_route(USER_RESOURCE_ROUTE, user_handlers.UserResource())
+
+    def test_rate_limiter_response_headers(self):
+        self.simulate_request(
+            path=USER_RESOURCE_ROUTE,
+            method='POST',
+            headers={'Content-Type': 'application/json'},
+            body=json.dumps(VALID_DATA))
+        self.assertEqual(self.srmock.status, falcon.HTTP_201)
+        header_keys = set([i[0] for i in self.srmock.headers])
+        target_keys = set(['x-ratelimit-limit', 'x-ratelimit-remaining', 'x-ratelimit-reset'])
+        self.assertTrue(target_keys < header_keys)
+        for item in self.srmock.headers:
+            if item[0] == 'x-ratelimit-limit':
+                self.assertEqual(item[1], 100)
+            if item[0] == 'x-ratelimit-remaining':
+                self.assertTrue(item[1] < 100)
+            if item[0] == 'x-ratelimit-reset':
+                self.assertTrue(item[1] > time())

@@ -1,6 +1,6 @@
 from time import time
 import falcon
-from app.utils.redis import redis_connection
+from app.utils.rate_limit import redis_connection
 
 
 class RateLimiter(object):
@@ -23,13 +23,13 @@ class RateLimiter(object):
             self.redis.set(key, 0)
 
         expires_in = self.redis.ttl(key)
-        if not expires_in:
+        if expires_in == -1:
             self.redis.expire(key, self.window)
             expires_in = self.window
 
-        res.headers['X-RateLimit-Remaining'] = remaining
-        res.headers['X-RateLimit-Limit'] = self.limit
-        res.headers['X-RateLimit-Reset'] = time() + expires_in
+        res.append_header('X-RateLimit-Remaining', remaining)
+        res.append_header('X-RateLimit-Limit', self.limit)
+        res.append_header('X-RateLimit-Reset', time() + expires_in)
 
         if remaining > 0:
             self.redis.incr(key, 1)
