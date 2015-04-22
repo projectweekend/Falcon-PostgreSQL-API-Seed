@@ -217,6 +217,7 @@ class RateLimitTestCase(APITestCase):
         self.api = falcon.API(middleware=[JSONBodyParser(), AuthUser(), RateLimiter()])
         # Add route to test the RateLimiter middleware
         self.api.add_route(USER_RESOURCE_ROUTE, user_handlers.UserResource())
+        self.api.add_route(AUTH_TEST_ROUTE, user_handlers.AuthTestResource())
 
     def test_rate_limiter_response_headers(self):
         self.simulate_request(
@@ -232,6 +233,23 @@ class RateLimitTestCase(APITestCase):
             if item[0] == 'x-ratelimit-limit':
                 self.assertEqual(item[1], 100)
             if item[0] == 'x-ratelimit-remaining':
-                self.assertTrue(item[1] < 100)
+                self.assertTrue(item[1] <= 100)
             if item[0] == 'x-ratelimit-reset':
                 self.assertTrue(item[1] > time())
+
+    def test_rate_limiter_authenticated(self):
+        response = self.simulate_request(
+            path=USER_RESOURCE_ROUTE,
+            method='POST',
+            headers={'Content-Type': 'application/json'},
+            body=json.dumps(VALID_DATA))
+        self.assertEqual(self.srmock.status, falcon.HTTP_201)
+        data = json.loads(response[0])
+        response = self.simulate_request(
+            path=AUTH_TEST_ROUTE,
+            method='GET',
+            headers={'Authorization': data['token']})
+        self.assertEqual(self.srmock.status, falcon.HTTP_200)
+        header_keys = set([i[0] for i in self.srmock.headers])
+        target_keys = set(['x-ratelimit-limit', 'x-ratelimit-remaining', 'x-ratelimit-reset'])
+        self.assertTrue(target_keys < header_keys)
