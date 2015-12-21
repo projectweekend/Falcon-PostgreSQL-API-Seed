@@ -1,6 +1,6 @@
 import json
 
-from urlparse import urlparse
+from urllib.parse import urlparse
 from falcon.testing import TestBase
 from app import api, db
 from app.config import DATABASE_URL
@@ -45,7 +45,11 @@ class APITestCase(TestBase):
             method=method,
             headers=HEADERS,
             body=json.dumps(data))
-        return json.loads(result[0])
+        try:
+            result = result[0]
+        except IndexError:
+            return None
+        return json.loads(result.decode('utf-8'))
 
     def simulate_get(self, path, token=None):
         return self._simulate_request(

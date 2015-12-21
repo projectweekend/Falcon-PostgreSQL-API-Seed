@@ -1,7 +1,7 @@
 import falcon
-from middleware.body_parser import JSONBodyParser
-from middleware.auth import AuthUser
-from utils.database import database_connection
+from app.middleware.body_parser import JSONBodyParser
+from app.middleware.auth import AuthUser
+from app.utils.database import database_connection
 
 
 db = database_connection()
@@ -11,4 +11,4 @@ middleware = [JSONBodyParser(), AuthUser()]
 api = falcon.API(middleware=middleware)
 
 
-import routes
+from app import routes

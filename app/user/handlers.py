@@ -4,12 +4,9 @@ from psycopg2 import IntegrityError
 from app.utils.auth import hash_password, verify_password, generate_token
 from app.utils.hooks import open_cursor_hook, close_cursor_hook, auth_required
 from app.utils.misc import make_code
-from validation import (
+from app.user.validation import (
     validate_user_create, validate_user_auth, validate_request_password_reset,
     validate_confirm_password_reset)
-
-USER_FIELDS = ['id', 'email', 'password', 'is_active', 'is_admin']
-USER_TOKEN_FIELDS = ['id', 'email', 'is_active', 'is_admin']
 
 
 @falcon.before(open_cursor_hook)

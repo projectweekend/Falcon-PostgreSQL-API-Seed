@@ -1,5 +1,5 @@
 import psycopg2
-from urlparse import urlparse
+from urllib.parse import urlparse
 from app.config import DATABASE_URL
 
 

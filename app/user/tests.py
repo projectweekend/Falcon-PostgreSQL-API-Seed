@@ -244,7 +244,7 @@ class RateLimitTestCase(APITestCase):
             headers={'Content-Type': 'application/json'},
             body=json.dumps(VALID_DATA))
         self.assertEqual(self.srmock.status, falcon.HTTP_201)
-        data = json.loads(response[0])
+        data = json.loads(response[0].decode('utf-8'))
         response = self.simulate_request(
             path=AUTH_TEST_ROUTE,
             method='GET',
