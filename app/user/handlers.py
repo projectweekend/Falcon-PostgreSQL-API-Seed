@@ -54,15 +54,15 @@ class AuthenticationResource(object):
         if result is None:
             raise falcon.HTTPUnauthorized(unauthorized_title, unauthorized_description)
 
-        user_dict = dict(zip(USER_FIELDS, result))
+        result = result[0]
 
-        valid_password = verify_password(password, user_dict.pop('password'))
+        valid_password = verify_password(password, result.pop('password'))
         if not valid_password:
             raise falcon.HTTPUnauthorized(unauthorized_title, unauthorized_description)
 
         res.status = falcon.HTTP_200
         res.body = json.dumps({
-            'token': generate_token(user_dict)
+            'token': generate_token(result)
         })
 
 
