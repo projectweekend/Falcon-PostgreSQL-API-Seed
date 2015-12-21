@@ -5,6 +5,7 @@ A Falcon Seed Project
 
 * [https://github.com/falconry/falcon](https://github.com/falconry/falcon)
 * [http://falcon.readthedocs.org/en/latest/](http://falcon.readthedocs.org/en/latest/)
+* [Python 3.5](https://docs.python.org/3/whatsnew/3.5.html)
 
 
 
