@@ -25,7 +25,7 @@ Database Migrations
 Database migrations are handled by [Flyway](http://flywaydb.org/) and files are stored in the `/sql` directory. Migrations are automatically applied when running tests with Nose. You can run migrations manually in the development environment using `docker-compose` too. To do this you will first need to identify the IP address assigned to the database by [checking available environment variables](https://docs.docker.com/compose/env/).
 
 ```
-docker-compose run web flyway -url=jdbc:postgresql://<ip address>:5432/postgres -user=postgres migrate
+docker-compose run web ./local_migrate.sh
 ```
 
 
