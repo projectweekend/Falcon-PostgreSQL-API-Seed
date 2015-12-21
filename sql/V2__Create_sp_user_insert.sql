@@ -6,23 +6,26 @@ CREATE FUNCTION sp_user_insert
 
 RETURNS TABLE
 (
-    id          INTEGER,
-    email       VARCHAR,
-    is_active   BOOLEAN,
-    is_admin    BOOLEAN
+    jdoc    JSON
 ) AS $$
 
 BEGIN
     RETURN      QUERY
-    WITH i as (
+    WITH inserted as (
         INSERT INTO     app_users
-                        (email, password)
-        VALUES          (userEmail, userPassword)
+                        (
+                            email,
+                            password
+                        )
+        VALUES          (
+                            userEmail,
+                            userPassword
+                        )
         RETURNING       app_users.id,
                         app_users.email,
                         app_users.is_active,
                         app_users.is_admin
     )
-    SELECT      i.*
-    FROM        i;
+    SELECT      ROW_TO_JSON(inserted.*)
+    FROM        inserted;
 END; $$ LANGUAGE plpgsql;

@@ -28,11 +28,11 @@ class UserResource(object):
             description = 'Email in use'
             raise falcon.HTTPConflict(title, description)
 
-        user_dict = dict(zip(USER_TOKEN_FIELDS, self.cursor.fetchone()))
+        result = self.cursor.fetchone()[0]
 
         res.status = falcon.HTTP_201
         res.body = json.dumps({
-            'token': generate_token(user_dict)
+            'token': generate_token(result)
         })
 
 
