@@ -1,15 +1,15 @@
 CREATE FUNCTION sp_lookup_user_by_email
 (
-    userEmail VARCHAR(255)
+    userEmail   VARCHAR(255)
 )
 
 RETURNS TABLE
 (
-    id INTEGER,
-    email VARCHAR,
-    password VARCHAR,
-    is_active BOOLEAN,
-    is_admin BOOLEAN
+    id          INTEGER,
+    email       VARCHAR,
+    password    VARCHAR,
+    is_active   BOOLEAN,
+    is_admin    BOOLEAN
 ) AS $$
 
 BEGIN

@@ -1,7 +1,7 @@
 CREATE FUNCTION sp_reset_password
 (
-    resetCode VARCHAR(255),
-    newPassword VARCHAR(255)
+    resetCode       VARCHAR(255),
+    newPassword     VARCHAR(255)
 ) RETURNS BOOLEAN AS $$
 
 BEGIN

@@ -1,15 +1,15 @@
 CREATE FUNCTION sp_user_insert
 (
-    userEmail VARCHAR(255),
-    userPassword VARCHAR(255)
+    userEmail       VARCHAR(255),
+    userPassword    VARCHAR(255)
 )
 
 RETURNS TABLE
 (
-    id INTEGER,
-    email VARCHAR,
-    is_active BOOLEAN,
-    is_admin BOOLEAN
+    id          INTEGER,
+    email       VARCHAR,
+    is_active   BOOLEAN,
+    is_admin    BOOLEAN
 ) AS $$
 
 BEGIN
